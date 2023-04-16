@@ -9,8 +9,12 @@ import { Button, CloseButton, Input, Modal, Textarea } from '.';
 import services, { UpdateTodoInput } from '../services';
 import { ITodo } from '../types';
 
+type PrivateAttr = {
+  __PENDING__?: boolean;
+};
+
 interface TodoCardProps {
-  data: ITodo & { isPending?: boolean };
+  data: ITodo & PrivateAttr;
   onUpdated?(data: ITodo): void;
   onDeleted?(data: ITodo): void;
 }
@@ -54,11 +58,11 @@ export function TodoCard({ data, onUpdated, onDeleted }: TodoCardProps) {
       className={twMerge(
         'group relative flex items-center gap-3 rounded-md border border-gray-200 bg-white p-4 aria-disabled:opacity-40',
       )}
-      {...(data.isPending && {
-        'aria-disabled': true,
-      })}
       {...(deleteMutation.isLoading && {
         'aria-busy': true,
+        'aria-disabled': true,
+      })}
+      {...(data.__PENDING__ && {
         'aria-disabled': true,
       })}
     >
@@ -100,7 +104,7 @@ export function TodoCard({ data, onUpdated, onDeleted }: TodoCardProps) {
         disabled={deleteMutation.isLoading}
         className={twMerge(
           'animate-fadein absolute top-0 right-0 -mt-2.5 -mr-2.5 hidden focus:block group-hover:block',
-          (deleteMutation.isLoading || data.isPending) && '!hidden',
+          (deleteMutation.isLoading || data.__PENDING__) && '!hidden',
         )}
       />
 

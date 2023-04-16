@@ -26,14 +26,7 @@ export default function Todos() {
     mutationKey: ['createTodo'],
     mutationFn: services.todo.create,
     onMutate(newTodo) {
-      const targetKey = [
-        queryKey[0],
-        {
-          page: 1,
-          size: queryKey[1].size,
-        },
-      ];
-
+      const targetKey = [queryKey[0], { page: 1, size: queryKey[1].size }];
       const previousData = client.getQueryData<FindAllTodosReturn>(targetKey);
 
       const updatedData = {
@@ -42,7 +35,7 @@ export default function Todos() {
           {
             ...newTodo,
             id: crypto.randomUUID(),
-            isPending: true,
+            __PENDING__: true,
           },
           ...previousData.todos.slice(0, size - 1),
         ],
