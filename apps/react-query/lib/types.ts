@@ -4,3 +4,8 @@ export interface ITodo {
   description: string;
   isComplete?: boolean;
 }
+
+export type InfiniteQueryResponse<T = any, P = any> = {
+  pages: T[];
+  pageParams: P[];
+};

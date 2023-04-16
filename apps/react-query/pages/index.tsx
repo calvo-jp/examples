@@ -2,66 +2,51 @@ import { useDebounce, useDisclosure } from '@examples/hooks';
 import { ChevronDownIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { dehydrate, useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import { GetStaticProps } from 'next';
-import { Fragment, useEffect, useState } from 'react';
+import { QueryKey, useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { twMerge } from 'tailwind-merge';
 import * as yup from 'yup';
 import { Button, CloseButton, Input, Modal, Textarea } from '../lib/components';
 import client from '../lib/config';
-import services from '../lib/services';
-import { ITodo } from '../lib/types';
-import { rm_undefined } from '../lib/utils';
-
-export const getStaticProps: GetStaticProps = async () => {
-  await client.prefetchInfiniteQuery({
-    queryKey: ['todos', { search: '' }],
-    queryFn() {
-      return services.todo.findAll({
-        page: 1,
-        size: 3,
-        filter: {
-          search: '',
-        },
-      });
-    },
-  });
-
-  return {
-    props: {
-      dehydratedState: rm_undefined(dehydrate(client)),
-    },
-  };
-};
+import services, { FindAllTodosReturn } from '../lib/services';
+import { InfiniteQueryResponse, ITodo } from '../lib/types';
 
 export default function Todos() {
   const [keyword, setKeyword] = useState('');
 
   const search = useDebounce(keyword);
+  const queryKey: QueryKey = ['todos', { search }];
 
-  const { data, isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    useInfiniteQuery({
-      queryKey: ['todos', { search }],
-      queryFn(context) {
-        const page = context.pageParam?.page ?? 1;
-        const size = context.pageParam?.size ?? 3;
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn(context) {
+      const page = context.pageParam?.page ?? 1;
+      const size = context.pageParam?.size ?? 3;
 
-        return services.todo.findAll({
-          page,
-          size,
-          filter: {
-            search,
-          },
-        });
-      },
-      select({ pages, ...args }) {
-        return { ...args, pages: pages.map((page) => page.todos).flat() };
-      },
-      getNextPageParam({ hasNext, nextPage }) {
-        return hasNext ? { page: nextPage } : null;
-      },
-    });
+      return services.todo.findAll({
+        page,
+        size,
+        filter: {
+          search,
+        },
+      });
+    },
+    select({ pages, ...args }) {
+      return { ...args, pages: pages.map((page) => page.todos).flat() };
+    },
+    getNextPageParam({ hasNext, nextPage }) {
+      return hasNext ? { page: nextPage } : null;
+    },
+  });
 
   useEffect(() => {
     return () => {
@@ -82,26 +67,36 @@ export default function Todos() {
       </section>
 
       <section className="mt-8 space-y-3">
-        {isLoading && (
-          <Fragment>
-            <TodoSkeleton />
-            <TodoSkeleton />
-            <TodoSkeleton />
-            <TodoSkeleton />
-          </Fragment>
-        )}
+        <TodoSkeleton when={isLoading} />
+        <TodoSkeleton when={isLoading} />
+        <TodoSkeleton when={isLoading} />
+        <TodoSkeleton when={isLoading} />
 
         {data?.pages.map((row) => (
           <Todo
             key={row.id}
             data={row}
-            onDeleted={async () => {
-              await client.invalidateQueries(['todos', { search }]);
+            onDeleted={() => {
+              const existing =
+                client.getQueryData<InfiniteQueryResponse<FindAllTodosReturn>>(
+                  queryKey,
+                );
+
+              const newPages = existing.pages.map((page) => {
+                return {
+                  ...page,
+                  todos: page.todos.filter((todo) => row.id !== todo.id),
+                };
+              });
+
+              client.setQueryData(queryKey, { ...existing, pages: newPages });
+
+              if (data.pages.length <= 1) fetchNextPage();
             }}
           />
         ))}
 
-        {isFetchingNextPage && <TodoSkeleton />}
+        <TodoSkeleton when={isFetchingNextPage} />
       </section>
 
       {hasNextPage && (
@@ -120,8 +115,8 @@ export default function Todos() {
       )}
 
       <CreateTodo
-        onCreated={async (data) => {
-          await client.invalidateQueries(['todos', { search }]);
+        onCreated={async () => {
+          client.invalidateQueries(['todos', { search }]);
         }}
       />
     </main>
@@ -140,6 +135,8 @@ type TodoProps = {
 };
 
 function Todo({ data, onDeleted }: TodoProps) {
+  const router = useRouter();
+
   const { mutate, isLoading } = useMutation({
     mutationKey: ['deleteTodo'],
     mutationFn: services.todo.delete,
@@ -150,10 +147,17 @@ function Todo({ data, onDeleted }: TodoProps) {
 
   return (
     <div
+      role="button"
+      onClick={() => {
+        router.push(`/${data.id}`);
+      }}
       className={twMerge(
-        'group relative flex items-center gap-3 rounded-md border border-gray-200 bg-white p-4',
-        isLoading && 'opacity-40',
+        'group relative flex items-center gap-3 rounded-md border border-gray-200 bg-white p-4 aria-disabled:opacity-40',
       )}
+      {...(isLoading && {
+        'aria-busy': true,
+        'aria-disabled': true,
+      })}
     >
       <button
         tabIndex={-1}
@@ -163,6 +167,10 @@ function Todo({ data, onDeleted }: TodoProps) {
           !data.isComplete &&
             'text-gray-300 transition-colors duration-300 hover:text-gray-400',
         )}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
         <CheckCircleIcon className="h-5 w-5" />
       </button>
@@ -173,7 +181,10 @@ function Todo({ data, onDeleted }: TodoProps) {
       </div>
 
       <CloseButton
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
           mutate(data.id);
         }}
         disabled={isLoading}
@@ -183,7 +194,9 @@ function Todo({ data, onDeleted }: TodoProps) {
   );
 }
 
-function TodoSkeleton() {
+function TodoSkeleton({ when }: { when?: boolean }) {
+  if (!when) return null;
+
   return (
     <div className="flex animate-pulse items-center gap-3 rounded-md bg-gray-50 px-4 py-5">
       <div className="h-4 w-4 rounded-full bg-gray-200" />
@@ -262,7 +275,11 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
             })}
           />
 
-          <Button variant="outline" className="w-full" disabled={formState.isSubmitting}>
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={formState.isSubmitting}
+          >
             Submit
           </Button>
         </form>

@@ -61,6 +61,11 @@ export async function findAll(
   logRequest({
     path: '/todos',
     method: 'GET',
+    queries: {
+      page,
+      size,
+      search,
+    },
   });
 
   return {
@@ -70,18 +75,19 @@ export async function findAll(
   };
 }
 
-export async function find(id: number) {
+export async function find(id: number, log = true) {
   await sleep();
 
   const todo = __todos__.find((todo) => id === todo.id);
 
   if (!todo) throw new DoesNotExistError();
 
-  logRequest({
-    path: '/todos',
-    params: id,
-    method: 'GET',
-  });
+  log &&
+    logRequest({
+      path: '/todos',
+      params: id,
+      method: 'GET',
+    });
 
   return todo;
 }
@@ -133,7 +139,7 @@ export async function update(id: number, input: UpdateTodoInput) {
 }
 
 export async function remove(id: number) {
-  await find(id);
+  await find(id, false);
 
   logRequest({
     path: '/todos',
