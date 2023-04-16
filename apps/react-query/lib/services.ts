@@ -107,10 +107,12 @@ export type CreateTodoInput = {
 };
 
 export async function create(input: CreateTodoInput) {
-  await sleep();
+  await sleep(1000);
 
   const id = (__todos__.at(0)?.id ?? 0) + 1;
   const todo: ITodo = { id, ...input };
+
+  if (input.title.toLowerCase() === '_error') throw new Error();
 
   __todos__ = [todo, ...__todos__];
 

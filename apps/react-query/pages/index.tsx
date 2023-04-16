@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Pagination } from '../lib/components';
-import { TodoCard, TodoCardSkeleton } from '../lib/components/todo-card';
+import { CreateTodoModal } from '../lib/components/CreateTodoModal';
+import { TodoCard, TodoCardSkeleton } from '../lib/components/TodoCard';
 import client from '../lib/config';
 import services, { FindAllTodosReturn } from '../lib/services';
 
@@ -9,7 +10,7 @@ export default function Todos() {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(3);
 
-  const queryKey = ['todos', { page, size }];
+  const queryKey = ['todos', { page, size }] as const;
 
   const { data, isLoading } = useQuery({
     queryKey,
@@ -18,6 +19,61 @@ export default function Todos() {
         page,
         size,
       });
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationKey: ['createTodo'],
+    mutationFn: services.todo.create,
+    onMutate(newTodo) {
+      const targetKey = [
+        queryKey[0],
+        {
+          page: 1,
+          size: queryKey[1].size,
+        },
+      ];
+
+      const previousData = client.getQueryData<FindAllTodosReturn>(targetKey);
+
+      const updatedData = {
+        ...previousData,
+        todos: [
+          {
+            ...newTodo,
+            id: crypto.randomUUID(),
+            isPending: true,
+          },
+          ...previousData.todos.slice(0, size - 1),
+        ],
+      };
+
+      client.setQueryData(targetKey, updatedData);
+      setPage(1);
+      client.cancelQueries(targetKey);
+
+      return {
+        updatedData,
+        previousData,
+      };
+    },
+    onSettled(newTodo) {
+      const currentData = client.getQueryData<FindAllTodosReturn>(queryKey);
+      const updatedData = {
+        ...currentData,
+        todos: currentData.todos.map((existingTodo) => {
+          if ('isPending' in existingTodo) {
+            return newTodo;
+          } else {
+            return existingTodo;
+          }
+        }),
+      };
+
+      client.setQueryData(queryKey, updatedData);
+    },
+    onError(_err, _newTodo, context) {
+      client.setQueryData(queryKey, context.previousData);
     },
   });
 
@@ -76,6 +132,8 @@ export default function Todos() {
         className="mt-6"
         isLoading={isLoading}
       />
+
+      <CreateTodoModal onSubmit={createMutation.mutate} />
     </div>
   );
 }

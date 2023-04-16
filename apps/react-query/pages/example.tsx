@@ -8,16 +8,10 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { twMerge } from 'tailwind-merge';
 import * as yup from 'yup';
-import {
-  Button,
-  CloseButton,
-  Input,
-  Modal,
-  Textarea,
-} from '../../lib/components';
-import client from '../../lib/config';
-import services, { FindAllTodosReturn } from '../../lib/services';
-import { InfiniteQueryResponse, ITodo } from '../../lib/types';
+import { Button, CloseButton, Input, Modal, Textarea } from '../lib/components';
+import client from '../lib/config';
+import services, { FindAllTodosReturn } from '../lib/services';
+import { InfiniteQueryResponse, ITodo } from '../lib/types';
 
 export default function Todos() {
   const [keyword, setKeyword] = useState('');
