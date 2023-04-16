@@ -70,19 +70,18 @@ export async function findAll(
   };
 }
 
-export async function find(id: number, log = true) {
-  await sleep(1);
+export async function find(id: number) {
+  await sleep();
 
   const todo = __todos__.find((todo) => id === todo.id);
 
   if (!todo) throw new DoesNotExistError();
 
-  log &&
-    logRequest({
-      path: '/todos',
-      params: id,
-      method: 'GET',
-    });
+  logRequest({
+    path: '/todos',
+    params: id,
+    method: 'GET',
+  });
 
   return todo;
 }
@@ -104,8 +103,6 @@ export async function create(input: CreateTodoInput) {
     path: '/todos',
     method: 'POST',
   });
-
-  console.log({ __todos__ });
 
   return todo;
 }
@@ -136,7 +133,7 @@ export async function update(id: number, input: UpdateTodoInput) {
 }
 
 export async function remove(id: number) {
-  await find(id, false);
+  await find(id);
 
   logRequest({
     path: '/todos',

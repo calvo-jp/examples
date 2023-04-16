@@ -1,15 +1,14 @@
 import { useDebounce, useDisclosure } from '@examples/hooks';
-import { Dialog, Transition } from '@headlessui/react';
 import { ChevronDownIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { dehydrate, useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import clsx from 'clsx';
 import { GetStaticProps } from 'next';
 import { Fragment, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { twMerge } from 'tailwind-merge';
 import * as yup from 'yup';
-import { Input, Textarea } from '../lib/components';
+import { Button, CloseButton, Input, Modal, Textarea } from '../lib/components';
 import client from '../lib/config';
 import services from '../lib/services';
 import { ITodo } from '../lib/types';
@@ -107,15 +106,16 @@ export default function Todos() {
 
       {hasNextPage && (
         <section className="mt-6 flex justify-center">
-          <button
+          <Button
+            variant="subtle"
             onClick={() => {
               fetchNextPage();
             }}
             disabled={isFetching}
-            className="rounded-full bg-gray-50 p-3 text-gray-500 transition-colors duration-300 hover:bg-sky-100 hover:text-sky-600 disabled:cursor-not-allowed disabled:bg-gray-50/50 disabled:text-gray-300"
+            className="rounded-full p-3"
           >
             <ChevronDownIcon className="h-5 w-5" />
-          </button>
+          </Button>
         </section>
       )}
 
@@ -142,20 +142,23 @@ type TodoProps = {
 function Todo({ data, onDeleted }: TodoProps) {
   const { mutate, isLoading } = useMutation({
     mutationKey: ['deleteTodo'],
-    async mutationFn() {
-      await services.todo.delete(data.id);
-    },
+    mutationFn: services.todo.delete,
     onSuccess() {
       onDeleted?.(data);
     },
   });
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-md border border-gray-200 p-4">
+    <div
+      className={twMerge(
+        'group relative flex items-center gap-3 rounded-md border border-gray-200 bg-white p-4',
+        isLoading && 'opacity-40',
+      )}
+    >
       <button
         tabIndex={-1}
         disabled={data.isComplete}
-        className={clsx(
+        className={twMerge(
           data.isComplete && 'text-emerald-500',
           !data.isComplete &&
             'text-gray-300 transition-colors duration-300 hover:text-gray-400',
@@ -169,15 +172,13 @@ function Todo({ data, onDeleted }: TodoProps) {
         <p className="line-clamp-1 text-gray-500">{data.description}</p>
       </div>
 
-      <button
-        className="animate-fadein absolute top-0 right-0 -mt-3 -mr-3 hidden rounded-full bg-black/40 p-1 text-white transition-colors duration-300 hover:bg-black/60 focus:block focus:bg-black/60 disabled:cursor-not-allowed disabled:bg-black/20 group-hover:block"
-        disabled={isLoading}
-        onClick={async () => {
-          mutate();
+      <CloseButton
+        onClick={() => {
+          mutate(data.id);
         }}
-      >
-        <XMarkIcon className="h-4 w-4" />
-      </button>
+        disabled={isLoading}
+        className="animate-fadein absolute top-0 right-0 -mt-2.5 -mr-2.5 hidden focus:block group-hover:block"
+      />
     </div>
   );
 }
@@ -234,71 +235,38 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
 
   return (
     <>
-      <button
-        className="z-floating-button fixed bottom-4 right-4 rounded-full bg-sky-400 p-3 text-white shadow-md outline-none transition-all duration-300 hover:bg-sky-400/90 focus:ring-4 focus:ring-sky-300/20"
+      <Button
+        className="z-floating-button fixed bottom-4 right-4 rounded-full p-3 shadow-md"
         onClick={onOpen}
       >
         <PencilSquareIcon className="h-6 w-6" />
-      </button>
+      </Button>
 
-      <Transition as={Fragment} show={isOpen} appear>
-        <Dialog as="div" className="relative z-50" onClose={onClose}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-          </Transition.Child>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <form onSubmit={onSubmit} className="space-y-5">
+          <Input
+            placeholder="Title"
+            {...register('title')}
+            {...(formState.errors.title && {
+              'aria-invalid': true,
+              'aria-errormessage': formState.errors.title.message,
+            })}
+          />
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white px-12 py-14 shadow-md">
-                  <form onSubmit={onSubmit} className="space-y-5">
-                    <Input
-                      placeholder="Title"
-                      {...register('title')}
-                      {...(formState.errors.title && {
-                        'aria-invalid': true,
-                        'aria-errormessage': formState.errors.title.message,
-                      })}
-                    />
+          <Textarea
+            placeholder="Description"
+            {...register('description')}
+            {...(formState.errors.description && {
+              'aria-invalid': true,
+              'aria-errormessage': formState.errors.description.message,
+            })}
+          />
 
-                    <Textarea
-                      placeholder="Description"
-                      {...register('description')}
-                      {...(formState.errors.description && {
-                        'aria-invalid': true,
-                        'aria-errormessage': formState.errors.description.message,
-                      })}
-                    />
-
-                    <button
-                      disabled={formState.isSubmitting}
-                      className="block w-full rounded-md border border-sky-300 bg-white px-3 py-2 text-lg uppercase tracking-wide text-sky-500 outline-none transition-all duration-300 hover:bg-sky-50 focus:bg-sky-50 disabled:cursor-not-allowed disabled:border-gray-50 disabled:text-gray-300 disabled:hover:bg-white"
-                    >
-                      Submit
-                    </button>
-                  </form>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
+          <Button variant="outline" className="w-full" disabled={formState.isSubmitting}>
+            Submit
+          </Button>
+        </form>
+      </Modal>
     </>
   );
 }
