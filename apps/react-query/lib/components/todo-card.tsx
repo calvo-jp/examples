@@ -37,10 +37,10 @@ export function TodoCard({ data, onUpdated, onDeleted }: TodoCardProps) {
 
   const disclosure = useDisclosure();
 
-  const form = useForm<yup.InferType<typeof updateTodoSchema>>({
+  const form = useForm<yup.InferType<typeof UpdateTodoSchema>>({
     shouldUnregister: true,
     shouldFocusError: true,
-    resolver: yupResolver(updateTodoSchema),
+    resolver: yupResolver(UpdateTodoSchema),
     defaultValues: { ...data },
   });
 
@@ -130,7 +130,7 @@ export function TodoCard({ data, onUpdated, onDeleted }: TodoCardProps) {
   );
 }
 
-const updateTodoSchema = yup
+const UpdateTodoSchema = yup
   .object({
     title: yup.string().min(2).max(25).required(),
     description: yup.string().min(2).max(255).required(),
