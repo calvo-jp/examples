@@ -55,7 +55,7 @@ export default function Todos() {
       const updatedData = {
         ...currentData,
         todos: currentData.todos.map((existingTodo) => {
-          if ('isPending' in existingTodo) {
+          if ('__PENDING__' in existingTodo) {
             return newTodo;
           } else {
             return existingTodo;
