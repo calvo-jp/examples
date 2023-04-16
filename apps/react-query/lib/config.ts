@@ -8,7 +8,7 @@ const client = new QueryClient({
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
-      keepPreviousData: true,
+      networkMode: 'always',
     },
   },
 });

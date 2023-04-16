@@ -4,7 +4,6 @@ import {
   ChevronRightIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import {
   ComponentProps,
   forwardRef,
@@ -16,7 +15,6 @@ import ReactTextareaAutosize, {
   TextareaAutosizeProps,
 } from 'react-textarea-autosize';
 import { twMerge } from 'tailwind-merge';
-import { ITodo } from './types';
 
 export const Input = forwardRef<HTMLInputElement, ComponentProps<'input'>>(
   function Input(props, ref) {
@@ -144,125 +142,24 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
   );
 }
 
-interface TodoCardsProps {
-  data?: ITodo[];
-}
-
-export function TodoCards({ data = [] }: TodoCardsProps) {
-  return (
-    <div className="space-y-4">
-      {data.map((todo) => (
-        <TodoCard key={todo.id} data={todo} />
-      ))}
-    </div>
-  );
-}
-
-interface TodoCardProps {
-  data: ITodo;
-  onClick?(data: ITodo): void;
-  onDelete?(data: ITodo): void;
-  isDeleting?: boolean;
-  onMarkAsComplete?(data: ITodo): void;
-  isMarkingAsComplete?: boolean;
-}
-
-export function TodoCard({
-  data,
-  onClick,
-  onDelete,
-  isDeleting,
-  onMarkAsComplete,
-  isMarkingAsComplete,
-}: TodoCardProps) {
-  return (
-    <div
-      role="button"
-      onClick={() => {
-        onClick?.(data);
-      }}
-      className={twMerge(
-        'group relative flex items-center gap-3 rounded-md border border-gray-200 bg-white p-4 aria-disabled:opacity-40',
-      )}
-      {...(isDeleting && {
-        'aria-busy': true,
-        'aria-disabled': true,
-      })}
-    >
-      <button
-        tabIndex={-1}
-        disabled={data.isComplete || isMarkingAsComplete}
-        className={twMerge(
-          data.isComplete && 'text-emerald-500',
-          !data.isComplete &&
-            'text-gray-300 transition-colors duration-300 hover:text-gray-400',
-        )}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          onMarkAsComplete?.(data);
-        }}
-      >
-        <CheckCircleIcon className="h-5 w-5" />
-      </button>
-
-      <div className="grow">
-        <h2 className="text-xl">{data.title}</h2>
-        <p className="line-clamp-1 text-gray-500">{data.description}</p>
-      </div>
-
-      <CloseButton
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          onDelete?.(data);
-        }}
-        disabled={isDeleting}
-        className="animate-fadein absolute top-0 right-0 -mt-2.5 -mr-2.5 hidden focus:block group-hover:block"
-      />
-    </div>
-  );
-}
-
-interface TodoCardSkeletonProps {
-  count?: number;
-}
-
-export function TodoCardSkeleton({ count = 1 }: TodoCardSkeletonProps) {
-  return (
-    <div className="space-y-4">
-      {new Array(count).fill(null).map((...args) => (
-        <div
-          key={args[1]}
-          className="flex animate-pulse items-center gap-3 rounded-md bg-gray-50 px-4 py-5"
-        >
-          <div className="h-4 w-4 rounded-full bg-gray-200" />
-          <div className="grow">
-            <div className="h-5 w-1/3 rounded-md bg-gray-200" />
-            <div className="mt-2 h-3 w-2/3 rounded-md bg-gray-200" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 interface PaginationProps
   extends Omit<ComponentProps<'div'>, 'size' | 'onChange'> {
   page?: number;
   size?: number;
   count?: number;
+  sizes?: number[];
   onChange?(ctx: { page: number; size: number }): void;
+  isLoading?: boolean;
 }
 
 export function Pagination({
   page = 1,
   size = 5,
   count = 0,
+  sizes = [],
   onChange,
   className,
+  isLoading,
   ...props
 }: PaginationProps) {
   const totalPages = Math.ceil(count / size);
@@ -310,7 +207,7 @@ export function Pagination({
       <div className="flex gap-3">
         <Button
           variant="subtle"
-          disabled={!hasPrev}
+          disabled={!hasPrev || isLoading}
           className="rounded-full p-2"
           onClick={prev}
         >
@@ -319,7 +216,7 @@ export function Pagination({
 
         <Button
           variant="subtle"
-          disabled={!hasNext}
+          disabled={!hasNext || isLoading}
           className="rounded-full p-2"
           onClick={next}
         >

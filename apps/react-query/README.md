@@ -62,17 +62,13 @@
   ```
 
 - Agnostic to fetching methods
-
 - First class SSR support (cache rehydration)
-
 - Light-weight
 
 ## Usage
 
 - Basic
   - useQuery
-  - useQueries
+  - useMutation (optimistic response and cache updates)
   - useInfiniteQuery
-  - useMutation
 - Cache rehydration
-- Working with cache

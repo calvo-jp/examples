@@ -1,20 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Pagination, TodoCards, TodoCardSkeleton } from '../../lib/components';
+import { useEffect, useState } from 'react';
+import { Pagination } from '../../lib/components';
+import { TodoCard, TodoCardSkeleton } from '../../lib/components/todo-card';
+import client from '../../lib/config';
 import services from '../../lib/services';
 
 export default function Example1() {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(3);
 
-  const { data, isFetching } = useQuery({
-    queryKey: [
-      'todos',
-      {
-        page,
-        size,
-      },
-    ],
+  const queryKey = ['todos', { page, size }];
+
+  const { data, isFetching, isInitialLoading } = useQuery({
+    queryKey,
     queryFn() {
       return services.todo.findAll({
         page,
@@ -23,10 +21,28 @@ export default function Example1() {
     },
   });
 
+  useEffect(() => {
+    return () => {
+      setPage(1);
+      setSize(3);
+    };
+  }, []);
+
   return (
     <div>
-      {isFetching && <TodoCardSkeleton count={size} />}
-      {!isFetching && <TodoCards data={data?.todos} />}
+      <div className="space-y-4">
+        <TodoCardSkeleton when={isInitialLoading} count={size} />
+
+        {data?.todos.map((todo) => (
+          <TodoCard
+            key={todo.id}
+            data={todo}
+            onDeleted={() => {
+              client.invalidateQueries(['todos']);
+            }}
+          />
+        ))}
+      </div>
 
       <Pagination
         page={page}
@@ -37,6 +53,7 @@ export default function Example1() {
           setSize(ctx.size);
         }}
         className="mt-6"
+        isLoading={isFetching}
       />
     </div>
   );
