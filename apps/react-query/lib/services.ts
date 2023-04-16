@@ -131,7 +131,7 @@ export type UpdateTodoInput = {
 export async function update(id: number, input: UpdateTodoInput) {
   await sleep();
 
-  let todo = await find(id);
+  let todo = await find(id, false);
 
   todo = {
     ...todo,

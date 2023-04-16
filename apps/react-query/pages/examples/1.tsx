@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pagination } from '../../lib/components';
 import { TodoCard, TodoCardSkeleton } from '../../lib/components/todo-card';
 import client from '../../lib/config';
-import services from '../../lib/services';
+import services, { FindAllTodosReturn } from '../../lib/services';
 
 export default function Example1() {
   const [page, setPage] = useState(1);
@@ -37,8 +37,29 @@ export default function Example1() {
           <TodoCard
             key={todo.id}
             data={todo}
+            onUpdated={(updatedTodo) => {
+              const currentData =
+                client.getQueryData<FindAllTodosReturn>(queryKey);
+
+              const updatedData = {
+                ...currentData,
+                todos: currentData.todos.map((existingTodo) => {
+                  if (existingTodo.id === updatedTodo.id) {
+                    return updatedTodo;
+                  } else {
+                    return existingTodo;
+                  }
+                }),
+              };
+
+              client.setQueryData(queryKey, updatedData);
+            }}
             onDeleted={() => {
               client.invalidateQueries(['todos']);
+
+              if (data.todos.length === 1 && data.hasPrev) {
+                setPage((currentPage) => currentPage - 1);
+              }
             }}
           />
         ))}

@@ -62,7 +62,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={twMerge(
-          'rounded-md px-3 py-2 text-lg uppercase tracking-wide outline-none transition-all duration-300',
+          'rounded-md px-3 py-2 text-lg tracking-wide outline-none transition-all duration-300',
           variant === 'solid' &&
             'bg-sky-400 text-white hover:bg-sky-400/90 focus:ring-4 focus:ring-sky-300/20',
           variant === 'subtle' &&
@@ -196,6 +196,9 @@ export function Pagination({
     hasPrev,
   ]);
 
+  const shouldDisabledPrev = isLoading || !hasPrev;
+  const shouldDisabledNext = isLoading || !hasNext;
+
   return (
     <div className={twMerge(className, 'flex items-center gap-4')} {...props}>
       <div role="status" aria-live="polite" className="text-gray-500">
@@ -207,7 +210,7 @@ export function Pagination({
       <div className="flex gap-3">
         <Button
           variant="subtle"
-          disabled={!hasPrev || isLoading}
+          disabled={shouldDisabledPrev}
           className="rounded-full p-2"
           onClick={prev}
         >
@@ -216,7 +219,7 @@ export function Pagination({
 
         <Button
           variant="subtle"
-          disabled={!hasNext || isLoading}
+          disabled={shouldDisabledNext}
           className="rounded-full p-2"
           onClick={next}
         >
