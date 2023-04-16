@@ -11,7 +11,7 @@ export default function Todos() {
 
   const queryKey = ['todos', { page, size }];
 
-  const { data, isFetching, isInitialLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey,
     queryFn() {
       return services.todo.findAll({
@@ -31,7 +31,7 @@ export default function Todos() {
   return (
     <div>
       <div className="space-y-4">
-        <TodoCardSkeleton when={isInitialLoading} count={size} />
+        <TodoCardSkeleton when={isLoading} count={size} />
 
         {data?.todos.map((todo) => (
           <TodoCard
@@ -74,7 +74,7 @@ export default function Todos() {
           setSize(ctx.size);
         }}
         className="mt-6"
-        isLoading={isFetching}
+        isLoading={isLoading}
       />
     </div>
   );

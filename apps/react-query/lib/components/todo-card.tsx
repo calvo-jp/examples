@@ -70,6 +70,8 @@ export function TodoCard({ data, onUpdated, onDeleted }: TodoCardProps) {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+
+          updateMutation.mutate({ isComplete: true });
         }}
       >
         <CheckCircleIcon className="h-5 w-5" />

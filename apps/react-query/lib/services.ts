@@ -125,7 +125,7 @@ export async function create(input: CreateTodoInput) {
 export type UpdateTodoInput = {
   title?: string;
   description?: string;
-  completedAt?: Date;
+  isComplete?: boolean;
 };
 
 export async function update(id: number, input: UpdateTodoInput) {
