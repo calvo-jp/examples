@@ -2,7 +2,7 @@ import { useDebounce, useDisclosure } from '@examples/hooks';
 import { Dialog, Transition } from '@headlessui/react';
 import { ChevronDownIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { dehydrate, useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { GetStaticProps } from 'next';
@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { Input, Textarea } from '../lib/components';
 import client from '../lib/config';
-import services, { FindAllTodosReturn } from '../lib/services';
+import services from '../lib/services';
 import { ITodo } from '../lib/types';
 import { rm_undefined } from '../lib/utils';
 
@@ -45,8 +45,8 @@ export default function Todos() {
     useInfiniteQuery({
       queryKey: ['todos', { search }],
       queryFn(context) {
-        const page = context.pageParam.page ?? 1;
-        const size = context.pageParam.size ?? 3;
+        const page = context.pageParam?.page ?? 1;
+        const size = context.pageParam?.size ?? 3;
 
         return services.todo.findAll({
           page,
@@ -61,10 +61,6 @@ export default function Todos() {
       },
       getNextPageParam({ hasNext, nextPage }) {
         return hasNext ? { page: nextPage } : null;
-      },
-      placeholderData: {
-        pages: [],
-        pageParams: null,
       },
     });
 
@@ -96,19 +92,12 @@ export default function Todos() {
           </Fragment>
         )}
 
-        {data.pages.map((row) => (
+        {data?.pages.map((row) => (
           <Todo
             key={row.id}
             data={row}
-            onDeleted={() => {
-              client.setQueriesData<{
-                pages: FindAllTodosReturn[];
-                [key: string]: unknown;
-              }>(['todos', { search }], (old) => {
-                console.log({ old });
-
-                return old;
-              });
+            onDeleted={async () => {
+              await client.invalidateQueries(['todos', { search }]);
             }}
           />
         ))}
@@ -130,7 +119,11 @@ export default function Todos() {
         </section>
       )}
 
-      <CreateTodo />
+      <CreateTodo
+        onCreated={async (data) => {
+          await client.invalidateQueries(['todos', { search }]);
+        }}
+      />
     </main>
   );
 }
@@ -219,14 +212,14 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
   >({
     shouldUnregister: true,
     shouldFocusError: true,
-    resolver: zodResolver(createTodoSchema),
+    resolver: yupResolver(createTodoSchema),
     defaultValues: {
       title: '',
       description: '',
     },
   });
 
-  const { mutate } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationKey: ['createTodo'],
     mutationFn: services.todo.create,
     onSuccess(data) {
@@ -235,7 +228,8 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    mutate(data);
+    await mutateAsync(data);
+    onClose();
   });
 
   return (
@@ -258,7 +252,7 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -292,7 +286,10 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
                       })}
                     />
 
-                    <button className="block w-full rounded-md border border-sky-300 px-3 py-2 text-lg uppercase tracking-wide text-sky-500 outline-none transition-all duration-300 hover:bg-sky-50 focus:bg-sky-50">
+                    <button
+                      disabled={formState.isSubmitting}
+                      className="block w-full rounded-md border border-sky-300 bg-white px-3 py-2 text-lg uppercase tracking-wide text-sky-500 outline-none transition-all duration-300 hover:bg-sky-50 focus:bg-sky-50 disabled:cursor-not-allowed disabled:border-gray-50 disabled:text-gray-300 disabled:hover:bg-white"
+                    >
                       Submit
                     </button>
                   </form>
@@ -308,7 +305,7 @@ function CreateTodo({ onCreated }: CreateTodoProps) {
 
 const createTodoSchema = yup
   .object({
-    title: yup.string().min(2).max(25).trim().required(),
-    description: yup.string().min(2).max(255).trim().required(),
+    title: yup.string().min(2).max(25).required(),
+    description: yup.string().min(2).max(255).required(),
   })
   .required();

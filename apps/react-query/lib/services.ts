@@ -74,7 +74,6 @@ export async function find(id: number, log = true) {
   await sleep(1);
 
   const todo = __todos__.find((todo) => id === todo.id);
-  console.log(__todos__.filter((todo) => id === todo.id));
 
   if (!todo) throw new DoesNotExistError();
 
@@ -105,6 +104,8 @@ export async function create(input: CreateTodoInput) {
     path: '/todos',
     method: 'POST',
   });
+
+  console.log({ __todos__ });
 
   return todo;
 }
