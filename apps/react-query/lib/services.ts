@@ -21,7 +21,10 @@ type FindAllTodosInput = {
 export type FindAllTodosReturn = {
   todos: ITodo[];
   hasNext: boolean;
+  hasPrev: boolean;
   nextPage: number | null;
+  prevPage: number | null;
+  totalCount: number;
 };
 
 export async function findAll(
@@ -56,7 +59,10 @@ export async function findAll(
   const chunks = arrayChunk(filtered, size);
   const todos = chunks.at(page - 1) ?? [];
   const hasNext = page < chunks.length;
+  const hasPrev = page > 1;
+  const prevPage = hasPrev ? page - 1 : null;
   const nextPage = hasNext ? page + 1 : null;
+  const totalCount = filtered.length;
 
   logRequest({
     path: '/todos',
@@ -71,7 +77,10 @@ export async function findAll(
   return {
     todos,
     hasNext,
+    hasPrev,
     nextPage,
+    prevPage,
+    totalCount,
   };
 }
 

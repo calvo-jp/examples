@@ -43,7 +43,7 @@
   }
   ```
 
-  Mutation (delete) fire somewhere
+  Mutation (delete) fired
 
   ```ts
   cache.evict(/* ... */);

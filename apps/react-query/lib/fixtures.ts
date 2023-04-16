@@ -22,13 +22,15 @@ export const todos: ITodo[] = [
   {
     id: 12,
     title: 'Sell snacks and drinks',
-    description: 'Offer a selection of refreshments to guests throughout the day',
+    description:
+      'Offer a selection of refreshments to guests throughout the day',
     isComplete: true,
   },
   {
     id: 11,
     title: 'Rent out beach equipment',
-    description: 'Provide guests with kayaks, paddleboards, and other beach equipment',
+    description:
+      'Provide guests with kayaks, paddleboards, and other beach equipment',
     isComplete: true,
   },
   {

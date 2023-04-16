@@ -13,15 +13,15 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <div className="mx-auto max-w-[650px] py-12 px-8">
-        <QueryClientProvider client={client}>
-          <ReactQueryDevtools />
+      <QueryClientProvider client={client}>
+        <ReactQueryDevtools />
 
-          <Hydrate state={pageProps.dehydratedState}>
+        <Hydrate state={pageProps.dehydratedState}>
+          <div className="mx-auto max-w-[650px] py-12 px-8">
             <Component {...pageProps} />
-          </Hydrate>
-        </QueryClientProvider>
-      </div>
+          </div>
+        </Hydrate>
+      </QueryClientProvider>
     </>
   );
 }
