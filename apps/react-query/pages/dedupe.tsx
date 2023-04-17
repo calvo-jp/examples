@@ -14,15 +14,15 @@ export default function Dedupe() {
 function ComponentA() {
   const { data } = useTodos();
 
-  console.log({ data });
+  console.log('Component A:', { data });
 
   return <Box>Component A</Box>;
 }
 
 function ComponentB() {
-  const { data } = useTodos();
+  const { data } = useTodos({ page: 2 });
 
-  console.log({ data });
+  console.log('Component B:', { data });
 
   return <Box>Component B</Box>;
 }
