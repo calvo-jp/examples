@@ -1,5 +1,6 @@
 import { debug } from '@examples/shared';
 import { useQuery } from '@tanstack/react-query';
+import { Button } from '../lib/components';
 import client from '../lib/config';
 
 export default function QueryKeys() {
@@ -35,17 +36,16 @@ export default function QueryKeys() {
     },
   });
 
-  debug.info('😈😈😈😈😈');
+  debug.info('******');
 
   return (
-    <div>
-      <button
-        onClick={() => {
-          client.invalidateQueries(['users', 'detail']);
-        }}
-      >
-        Click me
-      </button>
-    </div>
+    <Button
+      variant="outline"
+      onClick={() => {
+        client.invalidateQueries(['users', 'detail']);
+      }}
+    >
+      Click me
+    </Button>
   );
 }
