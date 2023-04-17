@@ -10,6 +10,11 @@ const client = new QueryClient({
       refetchOnWindowFocus: false,
       networkMode: 'always',
       retry: 3 /* exponential backoff delay */,
+      /* retryDelay */
+    },
+    mutations: {
+      /* retry */
+      /* retryDelay */
     },
   },
 });

@@ -79,3 +79,4 @@
   - `prefetchQuery`
 - **query deduplication**
 - **enabling/disabling queries**
+- **polling**
