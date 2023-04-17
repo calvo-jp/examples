@@ -144,7 +144,7 @@ export function TodoCard({ data, onUpdated, onDeleted }: TodoCardProps) {
 
 const UpdateTodoSchema = yup
   .object({
-    title: yup.string().min(2).max(25).required(),
+    title: yup.string().min(2).max(100).required(),
     description: yup.string().min(2).max(255).required(),
   })
   .required();
