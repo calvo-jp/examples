@@ -229,3 +229,20 @@ export function Pagination({
     </div>
   );
 }
+
+export const Box = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  function Box({ className, children, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        className={twMerge(
+          'w-fit rounded-md border border-gray-200 py-4 px-8 text-lg',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
