@@ -26,8 +26,8 @@ function ComponentB() {
 
 function ComponentC() {
   const { data } = useTodos();
-  console.log('Component B:', { data });
-  return <Box>Component B</Box>;
+  console.log('Component C:', { data });
+  return <Box>Component C</Box>;
 }
 
 function useTodos(input: FindAllTodosInput = {}) {
