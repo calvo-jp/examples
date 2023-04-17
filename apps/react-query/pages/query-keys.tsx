@@ -35,7 +35,7 @@ export default function QueryKeys() {
     },
   });
 
-  debug.info('🦄🦄🦄🦄🦄');
+  debug.info('😈😈😈😈😈');
 
   return (
     <div>
