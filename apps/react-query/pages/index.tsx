@@ -10,9 +10,15 @@ export default function Todos() {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(3);
 
-  const queryKey = ['todos', { page, size }] as const;
+  const queryKey = [
+    'todos',
+    {
+      page,
+      size,
+    },
+  ];
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey,
     queryFn() {
       return services.todo.findAll({
@@ -20,15 +26,13 @@ export default function Todos() {
         size,
       });
     },
-    networkMode: 'always',
-    /*  keepPreviousData: true, */
   });
 
   const createMutation = useMutation({
     mutationKey: ['createTodo'],
     mutationFn: services.todo.create,
     onMutate(newTodo) {
-      const targetKey = [queryKey[0], { page: 1, size: queryKey[1].size }];
+      const targetKey = ['todos', { page: 1, size }];
       const previousData = client.getQueryData<FindAllTodosReturn>(targetKey);
 
       const updatedData = {
@@ -125,7 +129,7 @@ export default function Todos() {
           setSize(ctx.size);
         }}
         className="mt-6"
-        isLoading={isLoading}
+        isLoading={isFetching}
       />
 
       <CreateTodoModal onSubmit={createMutation.mutate} />
