@@ -17,7 +17,7 @@
   };
 
   const cache = {
-    '{"key":"Query1","first":5,"after":null}': [refs[0], refs[1]],
+    '{"key":"Query1","first":5,"after":null}': [refs[0], refs[1], ...],
     '{"key":"Query1","first":5,"after":"cursorA"}': [],
     '{"key":"Query1","first":5,"after":"cursorB"}': [],
 
@@ -48,6 +48,9 @@
   ```ts
   cache.evict(/* ... */);
   ```
+
+  <br/>
+  <br/>
 
   **Non Normalized**
 
