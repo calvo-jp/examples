@@ -29,15 +29,13 @@ export default function Todos() {
     getNextPageParam({ hasNext, nextPage }) {
       return hasNext ? { page: nextPage } : null;
     },
+    keepPreviousData: true,
   });
 
   return (
     <main>
       <section className="space-y-3">
-        <TodoCardSkeleton when={isLoading} />
-        <TodoCardSkeleton when={isLoading} />
-        <TodoCardSkeleton when={isLoading} />
-        <TodoCardSkeleton when={isLoading} />
+        <TodoCardSkeleton count={3} when={isLoading} />
 
         {data?.pages.map((row) => (
           <TodoCard key={row.id} data={row} />
