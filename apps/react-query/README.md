@@ -2,7 +2,7 @@
 
 ## Difference between `@apollo/client`
 
-- Non-normalized cache
+- denormalized cache
 
   **Normalized**
 
