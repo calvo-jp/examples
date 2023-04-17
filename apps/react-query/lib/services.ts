@@ -12,7 +12,7 @@ type FindAllTodosFilterInput = {
   complete?: boolean;
 };
 
-type FindAllTodosInput = {
+export type FindAllTodosInput = {
   page?: number;
   size?: number;
   filter?: FindAllTodosFilterInput;

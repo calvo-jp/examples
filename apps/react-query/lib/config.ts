@@ -9,6 +9,7 @@ const client = new QueryClient({
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
       networkMode: 'always',
+      retry: 3 /* exponential backoff delay */,
     },
   },
 });

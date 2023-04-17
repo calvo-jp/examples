@@ -20,6 +20,8 @@ export default function Todos() {
         size,
       });
     },
+    networkMode: 'always',
+    /*  keepPreviousData: true, */
   });
 
   const createMutation = useMutation({

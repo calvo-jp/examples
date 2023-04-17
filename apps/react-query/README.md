@@ -70,8 +70,11 @@
 
 ## Usage
 
-- Basic
-  - useQuery
-  - useMutation (optimistic response and cache updates)
-  - useInfiniteQuery
-- Cache rehydration
+- **global config**
+- **hooks/utils**
+  - `useQuery`
+  - `useMutation` (cache updates & optimistic response)
+  - `useInfiniteQuery`
+  - `prefetchQuery`
+- **query deduplication**
+- **pausing queries**
