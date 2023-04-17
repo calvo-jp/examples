@@ -7,23 +7,26 @@ export default function Dedupe() {
     <div className="space-y-2">
       <ComponentA />
       <ComponentB />
+      <ComponentC />
     </div>
   );
 }
 
 function ComponentA() {
   const { data } = useTodos();
-
   console.log('Component A:', { data });
-
   return <Box>Component A</Box>;
 }
 
 function ComponentB() {
-  const { data } = useTodos({ page: 2 });
-
+  const { data } = useTodos();
   console.log('Component B:', { data });
+  return <Box>Component B</Box>;
+}
 
+function ComponentC() {
+  const { data } = useTodos();
+  console.log('Component B:', { data });
   return <Box>Component B</Box>;
 }
 
