@@ -36,7 +36,6 @@
   ```json
   "node": {
     "prop1": "",
-    "prop2": "",
     "prop3": "",
     "id": "1",
     "__typename": "Aa"
@@ -46,13 +45,14 @@
   Mutation (delete) fired
 
   ```ts
+  cache.identify(/* ... */);
   cache.evict(/* ... */);
   ```
 
   <br/>
   <br/>
 
-  **Non Normalized**
+  **Denormalized**
 
   ```ts
   const cache = {
