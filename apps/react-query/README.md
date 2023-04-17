@@ -77,4 +77,4 @@
   - `useInfiniteQuery`
   - `prefetchQuery`
 - **query deduplication**
-- **pausing queries**
+- **enabling/disabling queries**
