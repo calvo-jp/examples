@@ -50,7 +50,6 @@
   ```
 
   <br/>
-  <br/>
 
   **Denormalized**
 
@@ -63,6 +62,8 @@
     '["key3"]': {},
   };
   ```
+
+  <br/>
 
 - Agnostic to fetching methods
 - First class SSR support (cache rehydration)
