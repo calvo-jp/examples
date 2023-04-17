@@ -80,3 +80,9 @@
 - **query deduplication**
 - **enabling/disabling queries**
 - **polling**
+- **Importance of query keys**
+
+  ```ts
+  ["games", "list", { q: "Aa" }]
+  ["games", "detail", <id>]
+  ```
